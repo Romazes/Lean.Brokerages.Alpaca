@@ -112,7 +112,7 @@ public partial class AlpacaBrokerage
     {
         if (Log.DebuggingEnabled)
         {
-            Log.Debug($"{nameof(HandleTradeReceived)}: {obj}");
+            Log.Debug($"{nameof(HandleTradeReceived)}.JsonRealTimeTrade: Symbol={obj.Symbol}, Price={obj.Price}, Quantity={obj.Size}");
         }
 
         if (!_dataSubscriptionByBrokerageSymbol.TryGetValue(obj.Symbol, out var subscriptionData))
@@ -138,7 +138,7 @@ public partial class AlpacaBrokerage
     {
         if (Log.DebuggingEnabled)
         {
-            Log.Debug($"{nameof(HandleQuoteReceived)}: {obj}");
+            Log.Debug($"{nameof(HandleQuoteReceived)}.JsonRealTimeQuote: Symbol={obj.Symbol} [AskPrice={obj.AskPrice}, AskSize={obj.AskSize}] [BidPrice={obj.BidPrice}, BidSize={obj.BidSize}]");
         }
 
         if (!_dataSubscriptionByBrokerageSymbol.TryGetValue(obj.Symbol, out var subscriptionData))
