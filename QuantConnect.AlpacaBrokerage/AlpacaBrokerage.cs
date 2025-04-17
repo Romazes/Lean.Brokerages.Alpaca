@@ -611,7 +611,7 @@ namespace QuantConnect.Brokerages.Alpaca
                 return;
             }
 
-            foreach (var streamingClient in new IStreamingClient[] { _optionsStreamingClient, _orderStreamingClient, _equityStreamingClient, _cryptoStreamingClient })
+            foreach (var streamingClient in new IStreamingClient[] { _orderStreamingClient, _cryptoStreamingClient, _optionsStreamingClient, _equityStreamingClient})
             {
                 if (streamingClient == null)
                 {
@@ -643,7 +643,7 @@ namespace QuantConnect.Brokerages.Alpaca
 
                 if (!IsConnected)
                 {
-                    RunReconnectionLogic(60);
+                    RunReconnectionLogic(30);
                 }
                 else
                 {
