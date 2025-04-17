@@ -1,4 +1,4 @@
-﻿/*
+/*
  * QUANTCONNECT.COM - Democratizing Finance, Empowering Individuals.
  * Lean Algorithmic Trading Engine v2.0. Copyright 2014 QuantConnect Corporation.
  *
@@ -210,12 +210,12 @@ namespace QuantConnect.Brokerages.Alpaca
 
         private void StreamingClient_OnError(IStreamingClient client, Exception obj)
         {
-            Log.Trace($"{nameof(StreamingClient_OnError)}({client.GetType().Name}): {obj}");
+            Log.Trace($"{nameof(StreamingClient_OnError)}({client.GetStreamingClientName()}): {obj}");
         }
 
         private void StreamingClient_SocketClosed(IStreamingClient client)
         {
-            Log.Trace($"{nameof(StreamingClient_SocketClosed)}({client.GetType().Name}): SocketClosed");
+            Log.Trace($"{nameof(StreamingClient_SocketClosed)}({client.GetStreamingClientName()}): SocketClosed");
             if (_connected)
             {
                 _connected = false;
@@ -227,17 +227,17 @@ namespace QuantConnect.Brokerages.Alpaca
 
         private void StreamingClient_SocketOpened(IStreamingClient client)
         {
-            Log.Trace($"{nameof(StreamingClient_SocketOpened)}({client.GetType().Name}): SocketOpened");
+            Log.Trace($"{nameof(StreamingClient_SocketOpened)}({client.GetStreamingClientName()}): SocketOpened");
         }
 
         private void StreamingClient_OnWarning(IStreamingClient client, string obj)
         {
-            Log.Trace($"{nameof(StreamingClient_OnWarning)}({client.GetType().Name}): {obj}");
+            Log.Trace($"{nameof(StreamingClient_OnWarning)}({client.GetStreamingClientName()}): {obj}");
         }
 
         private void StreamingClient_Connected(IStreamingClient client, AuthStatus obj)
         {
-            Log.Trace($"{nameof(StreamingClient_Connected)}({client.GetType().Name}): {obj}");
+            Log.Trace($"{nameof(StreamingClient_Connected)}({client.GetStreamingClientName()}): {obj}");
         }
 
         #region Brokerage
@@ -625,7 +625,7 @@ namespace QuantConnect.Brokerages.Alpaca
                 var authorizedStatus = streamingClient.ConnectAndAuthenticateAsync().SynchronouslyAwaitTaskResult();
                 if (authorizedStatus != AuthStatus.Authorized)
                 {
-                    throw new InvalidOperationException($"Connect(): Failed to connect to {streamingClient.GetType().Name}");
+                    throw new InvalidOperationException($"Connect(): Failed to connect to {streamingClient.GetStreamingClientName()}");
                 }
             }
             _connected = true;

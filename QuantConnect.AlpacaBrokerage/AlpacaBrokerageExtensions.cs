@@ -1,4 +1,4 @@
-﻿/*
+/*
  * QUANTCONNECT.COM - Democratizing Finance, Empowering Individuals.
  * Lean Algorithmic Trading Engine v2.0. Copyright 2014 QuantConnect Corporation.
  *
@@ -211,4 +211,19 @@ public static class AlpacaBrokerageExtensions
         _ => throw new NotImplementedException($"{nameof(AlpacaBrokerageExtensions)}.{nameof(ConvertLeanResolutionToAlpacaBarTimeFrame)}: " +
             $"The resolution '{leanResolution}' is not supported. Please use Minute, Hour, or Daily resolution.")
     };
+
+    /// <summary>
+    /// Gets the specific name of the underlying streaming client type, 
+    /// providing a more descriptive type name when wrapped.
+    /// </summary>
+    /// <param name="streamingClient">The streaming client instance.</param>
+    /// <returns>The name of the underlying streaming client's type.</returns>
+    public static string GetStreamingClientName(this AlpacaMarket.IStreamingClient streamingClient)
+    {
+        return streamingClient switch
+        {
+            AlpacaStreamingClientWrapper wrapper => wrapper.StreamingClient.GetType().Name,
+            _ => streamingClient.GetType().Name
+        };
+    }
 }
