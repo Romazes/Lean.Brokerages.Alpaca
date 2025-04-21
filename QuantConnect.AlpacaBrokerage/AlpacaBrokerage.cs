@@ -396,6 +396,7 @@ namespace QuantConnect.Brokerages.Alpaca
         {
             try
             {
+                // TODO: Revert to Log.Debug when issue #28 is resolved
                 Log.Trace($"{nameof(AlpacaBrokerage)}.{nameof(HandleTradeUpdate)}: {obj}");
 
                 var brokerageOrderId = obj.Order.OrderId.ToString();
@@ -611,7 +612,7 @@ namespace QuantConnect.Brokerages.Alpaca
                 return;
             }
 
-            foreach (var streamingClient in new IStreamingClient[] { _orderStreamingClient, _cryptoStreamingClient, _optionsStreamingClient, _equityStreamingClient})
+            foreach (var streamingClient in new IStreamingClient[] { _optionsStreamingClient, _orderStreamingClient, _equityStreamingClient, _cryptoStreamingClient })
             {
                 if (streamingClient == null)
                 {
