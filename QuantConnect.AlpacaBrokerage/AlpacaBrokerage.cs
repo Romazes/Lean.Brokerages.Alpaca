@@ -1,4 +1,4 @@
-﻿/*
+/*
  * QUANTCONNECT.COM - Democratizing Finance, Empowering Individuals.
  * Lean Algorithmic Trading Engine v2.0. Copyright 2014 QuantConnect Corporation.
  *
@@ -654,10 +654,14 @@ namespace QuantConnect.Brokerages.Alpaca
                 }
                 else
                 {
-                    // resubscribe
-                    var symbols = _subscriptionManager.GetSubscribedSymbols();
-                    Unsubscribe(symbols);
-                    Subscribe(symbols);
+                    // if we are used as a brokerage ignore data queue handler updates
+                    if (_subscriptionManager != null)
+                    {
+                        // resubscribe
+                        var symbols = _subscriptionManager.GetSubscribedSymbols();
+                        Unsubscribe(symbols);
+                        Subscribe(symbols);
+                    }
                     // let consumers know we are reconnected, avoid lean killing us
                     OnMessage(new BrokerageMessageEvent(BrokerageMessageType.Reconnect, "Reconnected", "Brokerage Reconnected"));
                 }
