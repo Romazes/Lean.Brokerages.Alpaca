@@ -7,7 +7,7 @@
 
 ## Introduction
 
-This repository hosts the Alpaca Brokerage Plugin Integration with the QuantConnect LEAN Algorithmic Trading Engine. LEAN is a brokerage agnostic operating system for quantitative finance. Thanks to open-source plugins such as this [LEAN](https://github.com/QuantConnect/Lean) can route strategies to almost any market.
+This repository hosts the [Alpaca](http://qnt.co/alpaca) Brokerage Plugin Integration with the QuantConnect LEAN Algorithmic Trading Engine. LEAN is a brokerage agnostic operating system for quantitative finance. Thanks to open-source plugins such as this [LEAN](https://github.com/QuantConnect/Lean) can route strategies to almost any market.
 
 [LEAN](https://github.com/QuantConnect/Lean) is maintained primarily by [QuantConnect](https://www.quantconnect.com), a US based technology company hosting a cloud algorithmic trading platform. QuantConnect has successfully hosted more than 200,000 live algorithms since 2015, and trades more than $1B volume per month.
 
@@ -22,9 +22,9 @@ This repository hosts the Alpaca Brokerage Plugin Integration with the QuantConn
 </picture>
 <p>
 
-[Alpaca](https://alpaca.markets/) was founded by Yoshi Yokokawa and Hitoshi Harada in 2015 as a database and machine learning company. In 2018, Alpaca Securities LLC (Alpaca Securities) became a registered US broker-dealer with the Financial Industry Regulatory Authority ([FINRA](https://www.finra.org/)) with the mission to "open financial services to everyone on the planet". In 2022, Alpaca Crypto LLC (Alpaca Crypto) became a registered Money Services Business (MSB) with the Financial Crimes Enforcement Network ([FinCEN](https://www.fincen.gov/)). Alpaca provides access to trading Equities, Options, and Crypto for clients in over 30 countries. Alpaca also delivers custody, clearing, execution, and billing on behalf of registered advisors.
+[Alpaca](http://qnt.co/alpaca) was founded by Yoshi Yokokawa and Hitoshi Harada in 2015 as a database and machine learning company. In 2018, Alpaca Securities LLC (Alpaca Securities) became a registered US broker-dealer with the Financial Industry Regulatory Authority ([FINRA](https://www.finra.org/)) with the mission to "open financial services to everyone on the planet". In 2022, Alpaca Crypto LLC (Alpaca Crypto) became a registered Money Services Business (MSB) with the Financial Crimes Enforcement Network ([FinCEN](https://www.fincen.gov/)). [Alpaca](http://qnt.co/alpaca) provides access to trading Equities, Options, and Crypto for clients in over 30 countries. Alpaca also delivers custody, clearing, execution, and billing on behalf of registered advisors.
 
-For more information about the Alpaca brokerage, see the [QuantConnect-Alpaca Integration Page](https://www.quantconnect.com/docs/v2/our-platform/live-trading/brokerages/alpaca).
+For more information about the [Alpaca](http://qnt.co/alpaca) brokerage, see the [QuantConnect-Alpaca Integration Page](https://www.quantconnect.com/docs/v2/our-platform/live-trading/brokerages/alpaca).
 
 ## Using the Brokerage Plugin
   
@@ -34,11 +34,11 @@ For more information about the Alpaca brokerage, see the [QuantConnect-Alpaca In
   
  ![alpaca-deployment](https://github.com/user-attachments/assets/6c21eb08-7185-4716-9ddb-6f18904e2ceb)
 
-  In the QuantConnect Cloud Platform, you can harness the QuantConnect Live Data Feed, the Alpaca Live Data Feed, or both. For most users, this is substantially cheaper and easier than self-hosting.
+  In the QuantConnect Cloud Platform, you can harness the QuantConnect Live Data Feed, the [Alpaca](http://qnt.co/alpaca) Live Data Feed, or both. For most users, this is substantially cheaper and easier than self-hosting.
   
 ### Deploying Alpaca with LEAN CLI
 
-Follow these steps to start local live trading with the Alpaca brokerage:
+Follow these steps to start local live trading with the [Alpaca](http://qnt.co/alpaca) brokerage:
 
 1.  Open a terminal in your [CLI root directory](https://www.quantconnect.com/docs/v2/lean-cli/initialization/directory-structure#02-lean-init).
 2.  Run `lean live "<projectName>"` to start a live deployment wizard for the project in `./<projectName>` and then enter the brokerage number.
@@ -131,7 +131,7 @@ Follow these steps to start local live trading with the Alpaca brokerage:
 
 ## Account Types
 
-Alpaca supports cash and margin accounts.
+[Alpaca](http://qnt.co/alpaca) supports cash and margin accounts.
 
 ## Order Types and Asset Classes
 
@@ -161,7 +161,7 @@ For local deployment, the algorithm needs to download the following datasets:
 
 Lean models the brokerage behavior for backtesting purposes. The margin model is used in live trading to avoid placing orders that will be rejected due to insufficient buying power.
 
-You can set the Brokerage Model with the following statements
+You can set the [Alpaca](http://qnt.co/alpaca) Brokerage Model with the following statements
 
     SetBrokerageModel(BrokerageName.Alpaca, AccountType.Cash);
     SetBrokerageModel(BrokerageName.Alpaca, AccountType.Margin);
@@ -170,7 +170,7 @@ You can set the Brokerage Model with the following statements
 
 ### Fees
 
-The Alpaca trading for Equity and Equity Options is commission-free. To view the Alpaca trading fees for Crypto, see the [Crypto Fees](https://docs.alpaca.markets/docs/crypto-fees) page on the Alpaca website. To view how we model their fees, see [Fees](https://www.quantconnect.com/docs/v2/writing-algorithms/reality-modeling/brokerages/supported-models/alpaca#06-Fees).
+The [Alpaca](http://qnt.co/alpaca) trading for Equity and Equity Options is commission-free. To view the [Alpaca](http://qnt.co/alpaca) trading fees for Crypto, see the [Crypto Fees](https://docs.alpaca.markets/docs/crypto-fees) page on the Alpaca website. To view how we model their fees, see [Fees](https://www.quantconnect.com/docs/v2/writing-algorithms/reality-modeling/brokerages/supported-models/alpaca#06-Fees).
 
 ### Margin
 
@@ -180,7 +180,7 @@ We model buying power and margin calls to ensure your algorithm stays within the
 
 #### Buying Power
 
-In the US, Alpaca allows up to 2x leverage on Equity trades for margin accounts. In other countries, Alpaca may offer different amounts of leverage. To figure out how much leverage you can access, check with your local legislation or contact an Alpaca representative. We model the US version of Alpaca leverage by default.
+In the US, [Alpaca](http://qnt.co/alpaca) allows up to 2x leverage on Equity trades for margin accounts. In other countries, [Alpaca](http://qnt.co/alpaca) may offer different amounts of leverage. To figure out how much leverage you can access, check with your local legislation or contact an [Alpaca](http://qnt.co/alpaca) representative. We model the US version of Alpaca leverage by default.
 
 #### Margin Calls
 
@@ -205,7 +205,7 @@ security.MarginModel = new PatternDayTradingMarginModel();
 
 ### Slippage
 
-Orders through Alpaca do not experience slippage in backtests. In paper trading and live trading, your orders may experience slippage.
+Orders through [Alpaca](http://qnt.co/alpaca) do not experience slippage in backtests. In paper trading and live trading, your orders may experience slippage.
 
 ### Fills
 
