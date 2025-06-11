@@ -1,4 +1,7 @@
 {
+    "name" : "Alpaca",
+    "logo-url" : "https://cdn.quantconnect.com/i/tu/alpaca-brokerage-logo.svg",
+    "min-deposit" : "None",
     "description": "Alpaca offers commission-free trading to buy and sell stocks, options, or crypto.",
     "platforms-features": [
         {
