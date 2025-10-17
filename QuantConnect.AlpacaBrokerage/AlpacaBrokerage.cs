@@ -40,6 +40,9 @@ using QuantConnect.Configuration;
 using QuantConnect.Brokerages.CrossZero;
 using System.Collections.Concurrent;
 using System.Threading;
+using System.Runtime.CompilerServices;
+
+[assembly: InternalsVisibleTo("QuantConnect.Brokerages.Alpaca.Tests")]
 
 namespace QuantConnect.Brokerages.Alpaca
 {
@@ -73,6 +76,11 @@ namespace QuantConnect.Brokerages.Alpaca
 
         private readonly ManualResetEvent _reconnectionResetEvent = new(false);
         private readonly CancellationTokenSource _cancellationTokenSource = new();
+
+        /// <summary>
+        /// Maps each brokerage order ID to a set of execution IDs, used to detect and skip duplicate trade updates.
+        /// </summary>
+        internal readonly Dictionary<Guid, HashSet<Guid>> _duplicationExecutionOrderIdByBrokerageOrderId = [];
 
         /// <summary>
         /// Returns true if we're currently connected to the broker
@@ -319,7 +327,9 @@ namespace QuantConnect.Brokerages.Alpaca
                     leanOrder.Status = Orders.OrderStatus.PartiallyFilled;
                 }
 
-                leanOrder.BrokerId.Add(brokerageOrder.OrderId.ToString());
+                var brokerageOrderId = brokerageOrder.OrderId;
+                _duplicationExecutionOrderIdByBrokerageOrderId[brokerageOrderId] = [];
+                leanOrder.BrokerId.Add(brokerageOrderId.ToString());
                 leanOrders.Add(leanOrder);
             }
 
@@ -403,7 +413,7 @@ namespace QuantConnect.Brokerages.Alpaca
             return true;
         }
 
-        private void HandleTradeUpdate(ITradeUpdate obj)
+        internal void HandleTradeUpdate(ITradeUpdate obj)
         {
             try
             {
@@ -427,15 +437,32 @@ namespace QuantConnect.Brokerages.Alpaca
                     case TradeEvent.New:
                     case TradeEvent.PendingNew:
                         // we don't send anything for this event
+                        _duplicationExecutionOrderIdByBrokerageOrderId.TryAdd(obj.Order.OrderId, []);
                         return;
                     case TradeEvent.Rejected:
                     case TradeEvent.Canceled:
                     case TradeEvent.Replaced:
-                        OnOrderEvent(new OrderEvent(leanOrder, DateTime.UtcNow, OrderFee.Zero, $"{nameof(AlpacaBrokerage)} Order Event") { Status = newLeanOrderStatus });
+                        if (_duplicationExecutionOrderIdByBrokerageOrderId.Remove(obj.Order.OrderId))
+                        {
+                            if (newLeanOrderStatus == Orders.OrderStatus.UpdateSubmitted)
+                            { 
+                                _duplicationExecutionOrderIdByBrokerageOrderId[obj.Order.ReplacedByOrderId.Value] = [];
+                            }
+                            OnOrderEvent(new OrderEvent(leanOrder, DateTime.UtcNow, OrderFee.Zero, $"{nameof(AlpacaBrokerage)} Order Event") { Status = newLeanOrderStatus });
+                        }
                         return;
                     case TradeEvent.Fill:
+                        if (_duplicationExecutionOrderIdByBrokerageOrderId.Remove(obj.Order.OrderId))
+                        {
+                            break;
+                        }
+                        return;
                     case TradeEvent.PartialFill:
-                        break;
+                        if (_duplicationExecutionOrderIdByBrokerageOrderId[obj.Order.OrderId].Add(obj.ExecutionId.Value))
+                        {
+                            break;
+                        }
+                        return;
                     case TradeEvent.Accepted:
                     case TradeEvent.PendingReplace:
                     case TradeEvent.PendingCancel:
