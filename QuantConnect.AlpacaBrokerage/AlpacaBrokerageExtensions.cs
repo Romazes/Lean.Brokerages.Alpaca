@@ -100,8 +100,7 @@ public static class AlpacaBrokerageExtensions
             case OrderType.MarketOnClose:
                 return AlpacaMarket.MarketOrder.Sell(brokerageSymbol, quantity);
             case OrderType.TrailingStop:
-                var tso = (TrailingStopOrder)order;
-                var trailOffset = tso.TrailingAsPercentage ? AlpacaMarket.TrailOffset.InPercent(tso.TrailingAmount) : AlpacaMarket.TrailOffset.InDollars(tso.TrailingAmount);
+                var trailOffset = GetTrailOffsetValue(order as TrailingStopOrder);
                 return AlpacaMarket.TrailingStopOrder.Sell(brokerageSymbol, quantity, trailOffset);
             case OrderType.Limit:
                 decimal limitPrice;
@@ -141,8 +140,7 @@ public static class AlpacaBrokerageExtensions
             case OrderType.MarketOnClose:
                 return AlpacaMarket.MarketOrder.Buy(brokerageSymbol, quantity);
             case OrderType.TrailingStop:
-                var tso = (TrailingStopOrder)order;
-                var trailOffset = tso.TrailingAsPercentage ? AlpacaMarket.TrailOffset.InPercent(tso.TrailingAmount) : AlpacaMarket.TrailOffset.InDollars(tso.TrailingAmount);
+                var trailOffset = GetTrailOffsetValue(order as TrailingStopOrder);
                 return AlpacaMarket.TrailingStopOrder.Buy(brokerageSymbol, quantity, trailOffset);
             case OrderType.Limit:
                 decimal limitPrice;
@@ -227,5 +225,16 @@ public static class AlpacaBrokerageExtensions
             AlpacaStreamingClientWrapper wrapper => wrapper.StreamingClient.GetType().Name,
             _ => streamingClient.GetType().Name
         };
+    }
+
+    /// <summary>
+    /// Creates an Alpaca <see cref="AlpacaMarket.TrailOffset"/> from a Lean <see cref="TrailingStopOrder"/>.
+    /// Converts Lean's fractional percent (e.g. 0.02 = 2%) to Alpaca's whole percent (e.g. 2 = 2%).
+    /// </summary>
+    public static AlpacaMarket.TrailOffset GetTrailOffsetValue(this TrailingStopOrder order)
+    {
+        return order.TrailingAsPercentage
+            ? AlpacaMarket.TrailOffset.InPercent(order.TrailingAmount * 100m)
+            : AlpacaMarket.TrailOffset.InDollars(order.TrailingAmount);
     }
 }

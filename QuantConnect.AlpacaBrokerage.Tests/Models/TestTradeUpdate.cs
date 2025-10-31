@@ -32,8 +32,8 @@ public record TestTradeUpdate(TradeEvent Event, Guid? ExecutionId, IOrder Order)
 public record TestOrder(Guid OrderId, decimal FilledQuantity = 0) : IOrder
 {
     public string Symbol { get; init; } = "AAPL";
-    public OrderSide OrderSide { get; init; }
-    public AssetClass AssetClass { get; init; }
+    public OrderSide? OrderSide { get; init; }
+    public AssetClass? AssetClass { get; init; }
     public string ClientOrderId { get; init; }
     public DateTime? CreatedAtUtc { get; init; }
     public DateTime? UpdatedAtUtc { get; init; }
@@ -43,7 +43,7 @@ public record TestOrder(Guid OrderId, decimal FilledQuantity = 0) : IOrder
     public DateTime? CancelledAtUtc { get; init; }
     public DateTime? FailedAtUtc { get; init; }
     public DateTime? ReplacedAtUtc { get; init; }
-    public Guid AssetId { get; init; }
+    public Guid? AssetId { get; init; }
     public decimal? Notional { get; init; }
     public decimal? Quantity { get; init; }
     public long IntegerQuantity { get; init; }
