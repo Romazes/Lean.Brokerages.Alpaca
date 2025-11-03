@@ -8152,6 +8152,19 @@
             Gets or sets updated client order ID or <c>null</c> if client order ID is not changed.
             </summary>
         </member>
+        <member name="P:Alpaca.Markets.ChangeOrderRequest.TrailOffset">
+            <summary>
+            Gets or sets the trailing offset details used to calculate <see cref="P:Alpaca.Markets.ChangeOrderRequest.TrailValue"/>.
+            This property is ignored during JSON serialization and is used only to derive the <c>trail</c> payload.
+            </summary>
+        </member>
+        <member name="P:Alpaca.Markets.ChangeOrderRequest.TrailValue">
+            <summary>
+            Gets the trailing value that will be sent in the request payload (either <c>trail_price</c> or <c>trail_percent</c>).
+            This update applies only to orders of type <c>trailing_stop</c> and only before the stop price is triggered.
+            Note: you cannot switch between price-based and percent-based trailing types in a single update.
+            </summary>
+        </member>
         <member name="T:Alpaca.Markets.ChangeWatchListRequest`1">
             <summary>
             Encapsulates request parameters for
