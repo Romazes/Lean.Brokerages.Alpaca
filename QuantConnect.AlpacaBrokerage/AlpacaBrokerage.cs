@@ -78,6 +78,13 @@ namespace QuantConnect.Brokerages.Alpaca
         private readonly CancellationTokenSource _cancellationTokenSource = new();
 
         /// <summary>
+        /// Signals when the order <c>trade_updates</c> stream is authorized and
+        /// able to deliver fill events. Order operations wait on this so REST
+        /// order placement cannot race a dead stream (issue #58).
+        /// </summary>
+        private readonly ManualResetEventSlim _orderStreamReadyEvent = new(initialState: false);
+
+        /// <summary>
         /// Provides user-facing reason messages for specific trade events.
         /// Used when emitting order events.
         /// </summary>
@@ -258,6 +265,12 @@ namespace QuantConnect.Brokerages.Alpaca
             Log.Trace($"{nameof(StreamingClient_SocketClosed)}({client.GetStreamingClientName()}): SocketClosed");
             if (_connected)
             {
+                // Order-stream-specific: gate PlaceOrder/UpdateOrder/CancelOrder while the stream is down.
+                if (client == _orderStreamingClient)
+                {
+                    Log.Trace($"{nameof(StreamingClient_SocketClosed)}({client.GetStreamingClientName()}): order stream closed; blocking order operations until reconnect.");
+                    _orderStreamReadyEvent.Reset();
+                }
                 _connected = false;
                 // let consumers know, we will try to reconnect internally, if we can't lean will kill us
                 OnMessage(new BrokerageMessageEvent(BrokerageMessageType.Disconnect, "Disconnected", "Brokerage Disconnected"));
@@ -278,6 +291,12 @@ namespace QuantConnect.Brokerages.Alpaca
         private void StreamingClient_Connected(IStreamingClient client, AuthStatus obj)
         {
             Log.Trace($"{nameof(StreamingClient_Connected)}({client.GetStreamingClientName()}): {obj}");
+
+            if (client == _orderStreamingClient && obj == AuthStatus.Authorized)
+            {
+                Log.Trace($"{nameof(StreamingClient_Connected)}({client.GetStreamingClientName()}): order stream authorized; releasing order operations.");
+                _orderStreamReadyEvent.Set();
+            }
         }
 
         #region Brokerage
@@ -423,7 +442,7 @@ namespace QuantConnect.Brokerages.Alpaca
 
             try
             {
-                _messageHandler.WithLockedStream(() =>
+                ExecuteWhenReconnectedAndStreamLocked(nameof(PlaceOrder), () =>
                 {
                     var holdingQuantity = _securityProvider.GetHoldingsQuantity(order.Symbol);
                     var isPlaceCrossOrder = TryCrossZeroPositionOrder(order, holdingQuantity);
@@ -618,7 +637,7 @@ namespace QuantConnect.Brokerages.Alpaca
             try
             {
                 IOrder response = null;
-                _messageHandler.WithLockedStream(() =>
+                ExecuteWhenReconnectedAndStreamLocked(nameof(UpdateOrder), () =>
                 {
                     response = _tradingClient.PatchOrderAsync(pathOrderRequest).SynchronouslyAwaitTaskResult();
                     if (response == null || response.OrderStatus == AlpacaMarket.OrderStatus.Rejected)
@@ -664,7 +683,7 @@ namespace QuantConnect.Brokerages.Alpaca
             try
             {
                 var response = false;
-                _messageHandler.WithLockedStream(() =>
+                ExecuteWhenReconnectedAndStreamLocked(nameof(CancelOrder), () =>
                 {
                     var brokerageOrderId = new Guid(order.BrokerId.Last());
                     response = _tradingClient.CancelOrderAsync(brokerageOrderId).SynchronouslyAwaitTaskResult();
@@ -741,8 +760,36 @@ namespace QuantConnect.Brokerages.Alpaca
             var authorizedStatus = streamingClient.ConnectAndAuthenticateAsync().SynchronouslyAwaitTaskResult();
             if (authorizedStatus != AuthStatus.Authorized)
             {
-                throw new InvalidOperationException($"Connect(): Failed to connect to {streamingClient.GetStreamingClientName()}");
+                throw new InvalidOperationException($"Connect(): Failed to connect to {streamingClient.GetStreamingClientName()}. Status: {authorizedStatus}");
             }
+        }
+
+        /// <summary>
+        /// Runs <paramref name="action"/> through <see cref="BrokerageConcurrentMessageHandler{T}.WithLockedStream"/>,
+        /// but first waits for the order <c>trade_updates</c> stream to be authorized.
+        /// Prevents REST order placement from racing a dead stream and losing
+        /// subsequent fill events (issue #58).
+        /// </summary>
+        private void ExecuteWhenReconnectedAndStreamLocked(string methodName, Action action)
+        {
+            if (!_orderStreamReadyEvent.IsSet)
+            {
+                Log.Trace($"{nameof(AlpacaBrokerage)}.{nameof(ExecuteWhenReconnectedAndStreamLocked)}.{methodName}: waiting for order stream reconnect...");
+                try
+                {
+                    if (!_orderStreamReadyEvent.Wait(TimeSpan.FromMinutes(10), _cancellationTokenSource.Token))
+                    {
+                        Log.Error($"{nameof(AlpacaBrokerage)}.{nameof(ExecuteWhenReconnectedAndStreamLocked)}.{methodName}: order stream not ready after 10 minutes; skipping {methodName}.");
+                        return;
+                    }
+                }
+                catch (OperationCanceledException)
+                {
+                    return;
+                }
+                Log.Trace($"{nameof(AlpacaBrokerage)}.{nameof(ExecuteWhenReconnectedAndStreamLocked)}.{methodName}: order stream ready.");
+            }
+            _messageHandler.WithLockedStream(action);
         }
 
         private void ReconnectionLogic()
@@ -750,16 +797,19 @@ namespace QuantConnect.Brokerages.Alpaca
             Task.Factory.StartNew(() =>
             {
                 Log.Trace($"{nameof(AlpacaBrokerage)}.{nameof(ReconnectionLogic)}: Starting reconnection loop.");
+                var attempt = 0;
                 while (!_cancellationTokenSource.IsCancellationRequested)
                 {
                     _reconnectionResetEvent.WaitOne(_cancellationTokenSource.Token);
 
+                    var delay = TimeSpan.FromSeconds(5 * ++attempt);
+                    Log.Trace($"{nameof(AlpacaBrokerage)}.{nameof(ReconnectionLogic)}: attempt #{attempt}, waiting {delay.TotalSeconds}s...");
                     // The server enforces a 90-second timeout for "partially dead" connections.
                     // If another WebSocket connection is opened with the same API key/secret
                     // before the old one is fully closed, this may trigger the
                     // "Too many connections" error. Waiting here prevents premature reconnection
                     // attempts that would conflict with the server's timeout window.
-                    if (_cancellationTokenSource.Token.WaitHandle.WaitOne(TimeSpan.FromSeconds(90)))
+                    if (_cancellationTokenSource.Token.WaitHandle.WaitOne(delay))
                     {
                         break;
                     }
@@ -784,6 +834,7 @@ namespace QuantConnect.Brokerages.Alpaca
                                 Unsubscribe(symbols);
                                 Subscribe(symbols);
                             }
+                            attempt = 0;
                             // let consumers know we are reconnected, avoid lean killing us
                             OnMessage(new BrokerageMessageEvent(BrokerageMessageType.Reconnect, "Reconnected", "Brokerage Reconnected"));
                         }
@@ -814,6 +865,7 @@ namespace QuantConnect.Brokerages.Alpaca
         {
             _cancellationTokenSource?.Cancel();
             _cancellationTokenSource?.DisposeSafely();
+            _orderStreamReadyEvent?.DisposeSafely();
 
             _tradingClient.DisposeSafely();
 
