@@ -24,13 +24,13 @@ This repository hosts the [Alpaca](http://qnt.co/alpaca) Brokerage Plugin Integr
 
 [Alpaca](http://qnt.co/alpaca) was founded by Yoshi Yokokawa and Hitoshi Harada in 2015 as a database and machine learning company. In 2018, Alpaca Securities LLC (Alpaca Securities) became a registered US broker-dealer with the Financial Industry Regulatory Authority ([FINRA](https://www.finra.org/)) with the mission to "open financial services to everyone on the planet". In 2022, Alpaca Crypto LLC (Alpaca Crypto) became a registered Money Services Business (MSB) with the Financial Crimes Enforcement Network ([FinCEN](https://www.fincen.gov/)). [Alpaca](http://qnt.co/alpaca) provides access to trading Equities, Options, and Crypto for clients in over 30 countries. Alpaca also delivers custody, clearing, execution, and billing on behalf of registered advisors.
 
-For more information about the [Alpaca](http://qnt.co/alpaca) brokerage, see the [QuantConnect-Alpaca Integration Page](https://www.quantconnect.com/docs/v2/our-platform/live-trading/brokerages/alpaca).
+For more information about the [Alpaca](http://qnt.co/alpaca) brokerage, see the [QuantConnect-Alpaca Integration Page](https://www.quantconnect.com/docs/v2/cloud-platform/live-trading/brokerages/alpaca).
 
 ## Using the Brokerage Plugin
   
 ### Deploying Alpaca with VSCode User Interface
 
-  You can deploy using a visual interface in the QuantConnect cloud. For instructions, see the [QuantConnect-Alpaca Integration Page](https://www.quantconnect.com/docs/v2/our-platform/live-trading/brokerages/alpaca). 
+  You can deploy using a visual interface in the QuantConnect cloud. For instructions, see the [QuantConnect-Alpaca Integration Page](https://www.quantconnect.com/docs/v2/cloud-platform/live-trading/brokerages/alpaca). 
   
  ![alpaca-deployment](https://github.com/user-attachments/assets/6c21eb08-7185-4716-9ddb-6f18904e2ceb)
 
@@ -40,7 +40,7 @@ For more information about the [Alpaca](http://qnt.co/alpaca) brokerage, see the
 
 Follow these steps to start local live trading with the [Alpaca](http://qnt.co/alpaca) brokerage:
 
-1.  Open a terminal in your [CLI root directory](https://www.quantconnect.com/docs/v2/lean-cli/initialization/directory-structure#02-lean-init).
+1.  Open a terminal in your [CLI root directory](https://www.quantconnect.com/docs/v2/lean-cli/initialization/organization-workspaces#03-Directory-Structure).
 2.  Run `lean live "<projectName>"` to start a live deployment wizard for the project in `./<projectName>` and then enter the brokerage number.
 
 	```
@@ -110,8 +110,8 @@ Follow these steps to start local live trading with the [Alpaca](http://qnt.co/a
     To enter multiple options, separate them with comma: 21
     ```
 
-    If you select IQFeed, see [IQFeed](https://www.quantconnect.com/docs/v2/lean-cli/live-trading/other-data-feeds/iqfeed) for set up instructions.  
-    If you select Polygon Data Feed, see [Polygon](https://www.quantconnect.com/docs/v2/lean-cli/live-trading/other-data-feeds/polygon) for set up instructions.
+    If you select IQFeed, see [IQFeed](https://www.quantconnect.com/docs/v2/lean-cli/live-trading/data-providers/iqfeed) for set up instructions.  
+    If you select Polygon Data Feed, see [Polygon](https://www.quantconnect.com/docs/v2/lean-cli/live-trading/data-providers/polygon) for set up instructions.
 
 7.  In the browser window that automatically opens, click Allow.
 
@@ -176,7 +176,7 @@ The [Alpaca](http://qnt.co/alpaca) trading for Equity and Equity Options is comm
 
 We model buying power and margin calls to ensure your algorithm stays within the margin requirements.
 
-[Read Documentation](https://www.quantconnect.com/docs/v2/our-platform/live-trading/brokerages/alpaca#07-Margin)
+[Read Documentation](https://www.quantconnect.com/docs/v2/cloud-platform/live-trading/brokerages/alpaca#08-Margin)
 
 #### Buying Power
 
